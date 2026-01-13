@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>kBQ WORLD</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { background-color: #EEF2FF; margin: 0; font-family: sans-serif; }
+        .btn-card { transition: all 0.2s; border-bottom: 5px solid rgba(0,0,0,0.1); }
+        .btn-card:active { transform: translateY(4px); border-bottom-width: 0; }
+    </style>
+</head>
+<body>
+    <div id="root">
+        <div style="display:flex; justify-content:center; align-items:center; height:100vh;">
+            <p>Loading kBQ World... 🐻</p>
+        </div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const App = () => {
+            const [page, setPage] = useState('home');
+            const [score, setScore] = useState(0);
+
+            const speak = (msg) => {
+                window.speechSynthesis.cancel();
+                const speech = new SpeechSynthesisUtterance(msg);
+                speech.pitch = 1.4;
+                speech.rate = 0.8;
+                window.speechSynthesis.speak(speech);
+            };
+
+            const MenuCard = ({ title, icon, color, onClick }) => (
+                <button onClick={onClick} className={`bg-gradient-to-br ${color} p-6 rounded-[30px] shadow-xl text-white flex flex-col items-center btn-card`}>
+                    <span className="text-5xl mb-2">{icon}</span>
+                    <span className="font-bold text-sm uppercase">{title}</span>
+                </button>
+            );
+
+            return (
+                <div className="max-w-md mx-auto min-h-screen pb-10">
+                    <header className="bg-white p-4 flex justify-between items-center shadow-md rounded-b-[30px]">
+                        <h1 className="text-xl font-black text-indigo-600">kBQ WORLD 🐻</h1>
+                        <div className="bg-yellow-400 px-4 py-1 rounded-full text-white font-bold flex items-center">
+                            ⭐ {score}
+                        </div>
+                    </header>
+
+                    <main className="p-6">
+                        {page === 'home' && (
+                            <div className="grid grid-cols-2 gap-4">
+                                <MenuCard title="ABC" icon="🅰️" color="from-blue-400 to-blue-600" onClick={() => setPage('abc')} />
+                                <MenuCard title="123" icon="🔢" color="from-green-400 to-green-600" onClick={() => setPage('123')} />
+                                <MenuCard title="Hindi" icon="अ" color="from-orange-400 to-orange-600" onClick={() => setPage('hindi')} />
+                                <MenuCard title="Animals" icon="🦁" color="from-yellow-400 to-yellow-600" onClick={() => setPage('animals')} />
+                            </div>
+                        )}
+
+                        {page !== 'home' && (
+                            <div>
+                                <button onClick={() => setPage('home')} className="mb-4 text-indigo-600 font-bold flex items-center">
+                                     ← BACK TO HOME
+                                </button>
+                                <div className="grid grid-cols-2 gap-4">
+                                    {page === 'abc' && "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map(l => (
+                                        <button key={l} onClick={() => speak(l + " for Apple")} className="bg-white p-8 rounded-3xl text-4xl font-black text-indigo-500 shadow-sm active:bg-indigo-50">
+                                            {l}
+                                        </button>
+                                    ))}
+                                    {page === '123' && [1,2,3,4,5,6,7,8,9,10].map(n => (
+                                        <button key={n} onClick={() => speak(n.toString())} className="bg-white p-8 rounded-3xl text-4xl font-black text-green-500 shadow-sm active:bg-green-50">
+                                            {n}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
