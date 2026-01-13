@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>kBQ WORLD - Premium Kids App</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/framer-motion/10.12.16/framer-motion.umd.min.js"></script>
+    <style>
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        body { 
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+            margin: 0; font-family: 'Comic Sans MS', cursive, sans-serif;
+            overflow-x: hidden;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 4px solid #ffffff;
+            border-radius: 30px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .glass-card:active { transform: scale(0.9) rotate(-5deg); }
+        .floating { animation: float 3s ease-in-out infinite; }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        const App = () => {
+            const [page, setPage] = useState('home');
+            const [score, setScore] = useState(0);
+
+            const speak = (msg) => {
+                window.speechSynthesis.cancel();
+                const speech = new SpeechSynthesisUtterance(msg);
+                speech.pitch = 1.3;
+                speech.rate = 0.9;
+                window.speechSynthesis.speak(speech);
+            };
+
+            const alphabetData = [
+                {l:'A', w:'Apple', i:'🍎'}, {l:'B', w:'Ball', i:'⚽'}, {l:'C', w:'Cat', i:'🐱'}, {l:'D', w:'Dog', i:'🐶'},
+                {l:'E', w:'Elephant', i:'🐘'}, {l:'F', w:'Fish', i:'🐟'}, {l:'G', w:'Grapes', i:'🍇'}, {l:'H', w:'Horse', i:'🐴'},
+                {l:'I', w:'Ice-Cream', i:'🍦'}, {l:'J', w:'Joker', i:'🤡'}, {l:'K', w:'Kite', i:'🪁'}, {l:'L', w:'Lion', i:'🦁'},
+                {l:'M', w:'Monkey', i:'🐒'}, {l:'N', w:'Nest', i:'🪺'}, {l:'O', w:'Orange', i:'🍊'}, {l:'P', w:'Parrot', i:'🦜'},
+                {l:'Q', w:'Queen', i:'👸'}, {l:'R', w:'Rabbit', i:'🐰'}, {l:'S', w:'Sun', i:'☀️'}, {l:'T', w:'Tiger', i:'🐅'},
+                {l:'U', w:'Umbrella', i:'⛱️'}, {l:'V', w:'Van', i:'🚐'}, {l:'W', w:'Watch', i:'⌚'}, {l:'X', w:'Xylophone', i:'🎹'},
+                {l:'Y', w:'Yak', i:'🐂'}, {l:'Z', w:'Zebra', i:'🦓'}
+            ];
+
+            const animalData = [
+                {n:'Lion', i:'🦁', s:'Roar! I am the king!'}, {n:'Elephant', i:'🐘', s:'Trumpet! I am huge!'},
+                {n:'Monkey', i:'🐒', s:'Whoop Whoop! I love bananas!'}, {n:'Cow', i:'🐄', s:'Moo Moo! I give milk!'}
+            ];
+
+            return (
+                <div className="max-w-md mx-auto min-h-screen pb-10 px-4">
+                    <header className="py-6 flex justify-between items-center">
+                        <h1 className="text-3xl font-black text-white drop-shadow-lg floating">kBQ WORLD 🐻</h1>
+                        <div className="bg-white/90 p-2 px-4 rounded-full font-bold text-pink-600 shadow-lg">
+                            ⭐ {score}
+                        </div>
+                    </header>
+
+                    {page === 'home' && (
+                        <div className="grid grid-cols-1 gap-6">
+                            <button onClick={() => setPage('abc')} className="glass-card p-8 flex items-center justify-between overflow-hidden relative group">
+                                <div className="text-left">
+                                    <h2 className="text-2xl font-black text-blue-500">Learning ABC</h2>
+                                    <p className="text-gray-500">A for Apple, B for Ball...</p>
+                                </div>
+                                <span className="text-6xl floating">🅰️</span>
+                            </button>
+
+                            <button onClick={() => setPage('animals')} className="glass-card p-8 flex items-center justify-between">
+                                <div className="text-left">
+                                    <h2 className="text-2xl font-black text-orange-500">Animals</h2>
+                                    <p className="text-gray-500">Meet your wild friends!</p>
+                                </div>
+                                <span className="text-6xl floating">🦁</span>
+                            </button>
+                            
+                            <button onClick={() => setPage('quiz')} className="glass-card p-8 flex items-center justify-between bg-yellow-400">
+                                <h2 className="text-2xl font-black text-white">Fun Quiz</h2>
+                                <span className="text-6xl">🏆</span>
+                            </button>
+                        </div>
+                    )}
+
+                    {page !== 'home' && (
+                        <div>
+                            <button onClick={() => setPage('home')} className="bg-white/80 p-3 px-6 rounded-full font-bold mb-6 shadow-md text-indigo-600 active:scale-95">
+                                ← GO BACK
+                            </button>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                                {page === 'abc' && alphabetData.map(item => (
+                                    <button key={item.l} onClick={() => speak(`${item.l} for ${item.w}`)} className="glass-card p-6 flex flex-col items-center">
+                                        <span className="text-5xl mb-2">{item.i}</span>
+                                        <span className="text-3xl font-black text-indigo-600">{item.l}</span>
+                                        <span className="text-xs font-bold text-gray-400 uppercase">{item.w}</span>
+                                    </button>
+                                ))}
+
+                                {page === 'animals' && animalData.map(item => (
+                                    <button key={item.n} onClick={() => speak(item.s)} className="glass-card p-6 flex flex-col items-center">
+                                        <span className="text-6xl mb-2">{item.i}</span>
+                                        <span className="text-xl font-bold text-orange-600">{item.n}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
