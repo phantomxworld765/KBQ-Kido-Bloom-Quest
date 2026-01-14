@@ -3,134 +3,129 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>kBQ WORLD - Kids Pro</title>
+    <title>kBQ WORLD - All in One</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
-        @keyframes flow { 0% {background-position: 0% 50%;} 50% {background-position: 100% 50%;} 100% {background-position: 0% 50%;} }
+        @keyframes gradient { 0% {background-position: 0% 50%;} 50% {background-position: 100% 50%;} 100% {background-position: 0% 50%;} }
         body { 
             background: linear-gradient(-45deg, #FF9A9E, #FAD0C4, #A1C4FD, #C2E9FB);
-            background-size: 400% 400%; animation: flow 10s ease infinite;
+            background-size: 400% 400%; animation: gradient 10s ease infinite;
             margin: 0; font-family: 'Arial Rounded MT Bold', sans-serif;
-            user-select: none;
         }
-        .pop-card { background: white; border-radius: 30px; border: 5px solid #fff; box-shadow: 0 10px 20px rgba(0,0,0,0.1); transition: 0.3s; position: relative; overflow: hidden; }
-        .pop-card:active { transform: scale(0.9); }
-        .ad-space { background: #f3f4f6; border: 2px dashed #ccc; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #999; margin: 10px 0; border-radius: 10px; }
+        .card { background: white; border-radius: 25px; box-shadow: 0 10px 15px rgba(0,0,0,0.1); border: 4px solid #fff; transition: 0.2s; }
+        .card:active { transform: scale(0.95); }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState } = React;
+        const { useState, useRef, useEffect } = React;
 
         const App = () => {
-            const [screen, setScreen] = useState('home');
-            
-            const speak = (txt, lang = 'en-US') => {
+            const [page, setPage] = useState('home');
+            const [score, setScore] = useState(0);
+            const canvasRef = useRef(null);
+            const [isDrawing, setIsDrawing] = useState(false);
+
+            const speak = (txt, lang='en-US') => {
                 window.speechSynthesis.cancel();
                 const s = new SpeechSynthesisUtterance(txt);
-                s.lang = lang; s.pitch = 1.5; s.rate = 0.9;
+                s.lang = lang; s.pitch = 1.4; s.rate = 0.9;
                 window.speechSynthesis.speak(s);
             };
 
-            // --- DATA ---
-            const data = {
-                abc: [
-                    {l:'A', w:'Apple', i:'🍎'}, {l:'B', w:'Ball', i:'⚽'}, {l:'C', w:'Cat', i:'🐱'}, {l:'D', w:'Dog', i:'🐶'},
-                    {l:'E', w:'Elephant', i:'🐘'}, {l:'F', w:'Fish', i:'🐟'}, {l:'G', w:'Grapes', i:'🍇'}, {l:'H', w:'Horse', i:'🐴'}
-                ],
-                hindi: [
-                    {l:'अ', w:'अनार', i:'🍎'}, {l:'आ', w:'आम', i:'🥭'}, {l:'इ', w:'इमली', i:'🫛'}, {l:'ई', w:'ईख', i:'🎋'},
-                    {l:'क', w:'कबूतर', i:'🐦'}, {l:'ख', w:'खरगोश', i:'🐰'}
-                ],
-                animals: [
-                    {n:'Lion', i:'🦁', s:'I am the King of Jungle! Roar!'},
-                    {n:'Elephant', i:'🐘', s:'I have a long trunk! Trumpet!'},
-                    {n:'Monkey', i:'🐒', s:'I love bananas! Whoop Whoop!'}
-                ],
-                birds: [
-                    {n:'Parrot', i:'🦜', s:'I am a green Parrot! Kaa Kaa!'},
-                    {n:'Duck', i:'🦆', s:'I love swimming! Quack Quack!'},
-                    {n:'Owl', i:'🦉', s:'I wake up at night! Hoot Hoot!'}
-                ]
+            const abcData = [
+                {l:'A', w:'Apple', i:'🍎'}, {l:'B', w:'Ball', i:'⚽'}, {l:'C', w:'Cat', i:'🐱'}, {l:'D', w:'Dog', i:'🐶'},
+                {l:'E', w:'Elephant', i:'🐘'}, {l:'F', w:'Fish', i:'🐟'}, {l:'G', w:'Grapes', i:'🍇'}, {l:'H', w:'Horse', i:'🐴'},
+                {l:'I', w:'Ice-Cream', i:'🍦'}, {l:'J', w:'Joker', i:'🤡'}, {l:'K', w:'Kite', i:'🪁'}, {l:'L', w:'Lion', i:'🦁'}
+            ];
+
+            const hindiData = [
+                {l:'अ', w:'अनार', i:'🍎'}, {l:'आ', w:'आम', i:'🥭'}, {l:'इ', w:'इमली', i:'🫛'}, {l:'ई', w:'ईख', i:'🎋'}
+            ];
+
+            // Drawing Logic
+            const startDraw = (e) => {
+                setIsDrawing(true);
+                const ctx = canvasRef.current.getContext('2d');
+                const rect = canvasRef.current.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                const y = (e.clientY || e.touches[0].clientY) - rect.top;
+                ctx.beginPath(); ctx.moveTo(x, y);
+            };
+
+            const drawing = (e) => {
+                if(!isDrawing) return;
+                const ctx = canvasRef.current.getContext('2d');
+                const rect = canvasRef.current.getBoundingClientRect();
+                const x = (e.clientX || e.touches[0].clientX) - rect.left;
+                const y = (e.clientY || e.touches[0].clientY) - rect.top;
+                ctx.lineTo(x, y); ctx.strokeStyle = '#FF007F'; ctx.lineWidth = 8; ctx.lineCap = 'round'; ctx.stroke();
             };
 
             return (
-                <div className="max-w-md mx-auto min-h-screen flex flex-col p-4">
-                    {/* Top Ad Slot */}
-                    <div className="ad-space">BANNER AD (320x50)</div>
+                <div className="max-w-md mx-auto p-4 min-h-screen">
+                    <div className="flex justify-between items-center bg-white/70 p-4 rounded-3xl shadow-lg mb-6">
+                        <h1 className="text-xl font-black text-indigo-600">kBQ WORLD 🐻</h1>
+                        <div className="bg-yellow-400 text-white px-4 py-1 rounded-full font-bold">⭐ {score}</div>
+                    </div>
 
-                    <header className="flex justify-between items-center bg-white/90 p-4 rounded-3xl shadow-lg mb-4">
-                        <h1 className="text-2xl font-black text-indigo-600">kBQ WORLD 🐻</h1>
-                        <span className="text-2xl">⭐</span>
-                    </header>
+                    {page === 'home' && (
+                        <div className="grid grid-cols-2 gap-4">
+                            <button onClick={() => setPage('abc')} className="card p-6 flex flex-col items-center">
+                                <span className="text-5xl">🅰️</span><span className="font-bold text-blue-600 mt-2">ENGLISH</span>
+                            </button>
+                            <button onClick={() => setPage('hindi')} className="card p-6 flex flex-col items-center">
+                                <span className="text-5xl">अ</span><span className="font-bold text-orange-600 mt-2">HINDI</span>
+                            </button>
+                            <button onClick={() => setPage('math')} className="card p-6 flex flex-col items-center">
+                                <span className="text-5xl">🔢</span><span className="font-bold text-green-600 mt-2">MATHS</span>
+                            </button>
+                            <button onClick={() => setPage('art')} className="card p-6 flex flex-col items-center">
+                                <span className="text-5xl">🎨</span><span className="font-bold text-pink-600 mt-2">DRAWING</span>
+                            </button>
+                        </div>
+                    )}
 
-                    <main className="flex-1 pb-24">
-                        {screen === 'home' && (
-                            <div className="grid grid-cols-2 gap-4">
-                                <MenuBtn t="English" i="🅰️" c="text-blue-500" onClick={() => {setScreen('abc'); speak('Let us learn English')}} />
-                                <MenuBtn t="Hindi" i="अ" c="text-orange-500" onClick={() => {setScreen('hindi'); speak('Aao Hindi Seekhen', 'hi-IN')}} />
-                                <MenuBtn t="Animals" i="🦁" c="text-yellow-600" onClick={() => setScreen('animals')} />
-                                <MenuBtn t="Birds" i="🦜" c="text-green-500" onClick={() => setScreen('birds')} />
-                                <MenuBtn t="Rhymes" i="📺" c="text-red-500" onClick={() => setScreen('video')} />
-                                <MenuBtn t="Drawing" i="🎨" c="text-pink-500" onClick={() => speak('Coming Soon')} />
-                            </div>
-                        )}
-
-                        {(screen === 'abc' || screen === 'hindi') && (
-                            <div className="grid grid-cols-2 gap-4">
-                                {data[screen].map((item, i) => (
-                                    <div key={i} onClick={() => speak(`${item.l} for ${item.w}`, screen==='hindi'?'hi-IN':'en-US')} className="pop-card p-6 flex flex-col items-center">
-                                        <span className="text-6xl mb-2">{item.i}</span>
-                                        <span className="text-4xl font-black text-indigo-600">{item.l}</span>
-                                        <p className="text-xs font-bold text-gray-400 uppercase">{item.w}</p>
+                    {page !== 'home' && (
+                        <div>
+                            <button onClick={() => setPage('home')} className="mb-6 bg-white p-2 px-6 rounded-full font-bold shadow-md">← BACK</button>
+                            
+                            {page === 'abc' && <div className="grid grid-cols-2 gap-4">
+                                {abcData.map(d => (
+                                    <div key={d.l} onClick={() => speak(d.l + " for " + d.w)} className="card p-4 flex flex-col items-center">
+                                        <span className="text-5xl">{d.i}</span>
+                                        <span className="text-4xl font-black text-indigo-500">{d.l}</span>
+                                        <span className="text-xs text-gray-400 uppercase">{d.w}</span>
                                     </div>
                                 ))}
-                            </div>
-                        )}
+                            </div>}
 
-                        {(screen === 'animals' || screen === 'birds') && (
-                            <div className="grid grid-cols-1 gap-4">
-                                {data[screen].map((item, i) => (
-                                    <div key={i} onClick={() => speak(item.s)} className="pop-card p-6 flex items-center justify-between">
-                                        <span className="text-7xl">{item.i}</span>
-                                        <div className="text-right">
-                                            <h2 className="text-2xl font-bold text-indigo-600">{item.n}</h2>
-                                            <p className="text-sm text-pink-500">Tap to hear sound! 🔊</p>
-                                        </div>
+                            {page === 'hindi' && <div className="grid grid-cols-2 gap-4">
+                                {hindiData.map(d => (
+                                    <div key={d.l} onClick={() => speak(d.l + " se " + d.w, 'hi-IN')} className="card p-4 flex flex-col items-center">
+                                        <span className="text-5xl">{d.i}</span>
+                                        <span className="text-4xl font-black text-orange-500">{d.l}</span>
+                                        <span className="text-xs text-gray-400">{d.w}</span>
                                     </div>
                                 ))}
-                            </div>
-                        )}
+                            </div>}
 
-                        {screen === 'video' && (
-                            <div className="space-y-4">
-                                <h2 className="text-center font-bold text-red-600">Nursery Rhymes 🎶</h2>
-                                <iframe className="w-full rounded-3xl shadow-xl" height="200" src="https://www.youtube.com/embed/7XpL8N85Dk8" frameBorder="0" allowFullScreen></iframe>
-                                <iframe className="w-full rounded-3xl shadow-xl" height="200" src="https://www.youtube.com/embed/jY7Ab_Y_L0g" frameBorder="0" allowFullScreen></iframe>
-                            </div>
-                        )}
-                    </main>
-
-                    {screen !== 'home' && (
-                        <button onClick={() => setScreen('home')} className="fixed bottom-8 left-1/2 -translate-x-1/2 bg-white text-indigo-600 px-12 py-3 rounded-full shadow-2xl font-black border-4 border-indigo-50">
-                            ← HOME
-                        </button>
+                            {page === 'art' && <div className="card overflow-hidden">
+                                <canvas ref={canvasRef} width={350} height={450} 
+                                    onMouseDown={startDraw} onMouseMove={drawing} onMouseUp={() => setIsDrawing(false)}
+                                    onTouchStart={startDraw} onTouchMove={drawing} onTouchEnd={() => setIsDrawing(false)}
+                                    className="bg-white w-full touch-none" />
+                            </div>}
+                        </div>
                     )}
                 </div>
             );
         };
-
-        const MenuBtn = ({t, i, c, onClick}) => (
-            <div onClick={onClick} className="pop-card p-6 flex flex-col items-center cursor-pointer">
-                <span className="text-6xl mb-2 drop-shadow-md">{i}</span>
-                <span className={`font-black uppercase text-sm ${c}`}>{t}</span>
-            </div>
-        );
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
